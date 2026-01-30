@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
@@ -20,12 +20,22 @@ export default function Probability() {
   const probabilities = useQuery(api.leads.getProbabilities);
   const updateAll = useMutation(api.leads.updateAllProbabilities);
   
+  // Valores numéricos internos (0-1)
   const [localValues, setLocalValues] = useState({
     sos: 0.05,
     grua: 0.1,
     moto: 0.15,
     moura: 0.2,
     lusqtoff: 0.25,
+  });
+  
+  // Valores de texto para los inputs (0-100)
+  const [inputValues, setInputValues] = useState({
+    sos: '5',
+    grua: '10',
+    moto: '15',
+    moura: '20',
+    lusqtoff: '25',
   });
   
   const [isEditing, setIsEditing] = useState(false);
@@ -35,12 +45,23 @@ export default function Probability() {
 
   useEffect(() => {
     if (probabilities) {
-      setLocalValues({
+      const newValues = {
         sos: probabilities.sos ?? 0.05,
         grua: probabilities.grua ?? 0.1,
         moto: probabilities.moto ?? 0.15,
         moura: probabilities.moura ?? 0.2,
         lusqtoff: probabilities.lusqtoff ?? 0.25,
+      };
+      
+      setLocalValues(newValues);
+      
+      // Actualizar inputs con valores formateados
+      setInputValues({
+        sos: (newValues.sos * 100).toString(),
+        grua: (newValues.grua * 100).toString(),
+        moto: (newValues.moto * 100).toString(),
+        moura: (newValues.moura * 100).toString(),
+        lusqtoff: (newValues.lusqtoff * 100).toString(),
       });
     }
   }, [probabilities]);
@@ -49,18 +70,55 @@ export default function Probability() {
   const lossPercentage = (1 - totalProbability) * 100;
 
   const handleValueChange = (prize: keyof typeof localValues, value: string) => {
-    const numValue = parseFloat(value) / 100;
-    
-    if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+    // Permitir campo vacío o valores numéricos válidos
+    if (value === '' || value === '.') {
+      setInputValues(prev => ({ ...prev, [prize]: value }));
+      setLocalValues(prev => ({ ...prev, [prize]: 0 }));
+      setError(null);
+      setSuccess(false);
       return;
     }
-
-    setLocalValues(prev => ({
-      ...prev,
-      [prize]: numValue,
-    }));
+    
+    // Validar que sea un número válido
+    const numValue = parseFloat(value);
+    
+    if (isNaN(numValue)) {
+      return; // No actualizar si no es un número válido
+    }
+    
+    // Limitar a rango 0-100
+    if (numValue < 0) {
+      setInputValues(prev => ({ ...prev, [prize]: '0' }));
+      setLocalValues(prev => ({ ...prev, [prize]: 0 }));
+    } else if (numValue > 100) {
+      setInputValues(prev => ({ ...prev, [prize]: '100' }));
+      setLocalValues(prev => ({ ...prev, [prize]: 1 }));
+    } else {
+      // Actualizar con el valor ingresado (mantener el texto original)
+      setInputValues(prev => ({ ...prev, [prize]: value }));
+      setLocalValues(prev => ({ ...prev, [prize]: numValue / 100 }));
+    }
+    
     setError(null);
     setSuccess(false);
+  };
+
+  const handleBlur = (prize: keyof typeof localValues) => {
+    // Al salir del input, formatear el valor si es necesario
+    const currentValue = inputValues[prize];
+    
+    if (currentValue === '' || currentValue === '.') {
+      setInputValues(prev => ({ ...prev, [prize]: '0' }));
+      setLocalValues(prev => ({ ...prev, [prize]: 0 }));
+      return;
+    }
+    
+    const numValue = parseFloat(currentValue);
+    if (!isNaN(numValue)) {
+      // Formatear a un decimal si tiene decimales innecesarios
+      const formatted = numValue.toFixed(numValue % 1 === 0 ? 0 : 1);
+      setInputValues(prev => ({ ...prev, [prize]: formatted }));
+    }
   };
 
   const handleSave = async () => {
@@ -89,12 +147,21 @@ export default function Probability() {
 
   const handleCancel = () => {
     if (probabilities) {
-      setLocalValues({
+      const newValues = {
         sos: probabilities.sos ?? 0.05,
         grua: probabilities.grua ?? 0.1,
         moto: probabilities.moto ?? 0.15,
         moura: probabilities.moura ?? 0.2,
         lusqtoff: probabilities.lusqtoff ?? 0.25,
+      };
+      
+      setLocalValues(newValues);
+      setInputValues({
+        sos: (newValues.sos * 100).toString(),
+        grua: (newValues.grua * 100).toString(),
+        moto: (newValues.moto * 100).toString(),
+        moura: (newValues.moura * 100).toString(),
+        lusqtoff: (newValues.lusqtoff * 100).toString(),
       });
     }
     setIsEditing(false);
@@ -117,13 +184,13 @@ export default function Probability() {
   return (
     <div className="bg-white border border-gray-200 rounded p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-sm font-semibold text-gray-900">
+        <h2 className="text-sm md:text-lg font-semibold text-gray-900">
           Configuración de Probabilidades
         </h2>
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="bg-orange-500 text-white px-3 py-1 text-xs font-medium  border border-gray-300 rounded transition-colors"
+            className="bg-orange-500 text-white px-3 py-1 text-sm font-medium border border-gray-300 rounded transition-colors"
           >
             Editar
           </button>
@@ -139,9 +206,9 @@ export default function Probability() {
             <button
               onClick={handleSave}
               disabled={isSaving || totalProbability > 1}
-              className="px-3 py-1 text-xs font-medium text-white bg-gray-900 rounded hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs font-medium text-white bg-green-700 rounded hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Guardando...' : 'Guardar'}
+              {isSaving ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </div>
         )}
@@ -176,13 +243,12 @@ export default function Probability() {
                   {isEditing ? (
                     <div className="flex items-center gap-1">
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         id={`prob-${prize.id}`}
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        value={percentage}
+                        value={inputValues[prize.id]}
                         onChange={(e) => handleValueChange(prize.id, e.target.value)}
+                        onBlur={() => handleBlur(prize.id)}
                         className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                       />
                       <span className="text-xs text-gray-500">%</span>

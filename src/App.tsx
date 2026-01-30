@@ -3,6 +3,7 @@ import { api } from "../convex/_generated/api";
 import { useQuery } from "convex/react";
 import * as XLSX from "xlsx";
 import Probability from "./Probability";
+import { Download } from "lucide-react";
 
 
 export default function Home() {
@@ -48,17 +49,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-lg md:text-3xl font-bold text-gray-900 mb-8">
-          SOS JACKSPOT
+        <h1 className="text-lg md:text-3xl text-center md:text-left font-light text-gray-900 mb-6">
+          Panel de configuración y metricas | <br className="md:hidden" /> <strong className="font-bold text-lg md:text-2xl">SOS JACKSPOT</strong>
         </h1>
-
-
-
-        {/* Componente de configuración de probabilidades */}
         <Probability />
-
-        {/* Estadísticas */}
-        <div className="my-4 flex  items-center justify-between gap-6 text-xs md:text-lg font-bold text-gray-600 mt-14">
+        <hr className="h-4 border-black my-10" />
+        <div className="my-4 flex  items-center justify-between gap-6 text-xs md:text-lg font-bold text-gray-600">
           <p>
             Total de registrados:{" "}
             <span className="text-gray-900">{leads.length}</span>
@@ -80,9 +76,10 @@ export default function Home() {
         <div className="flex justify-end">
           <button
             onClick={handleExport}
-            className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            className="mb-2 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
           >
-            Exportar Excel
+            Descargar Excel
+            <Download size={15} />
           </button>
         </div>
         {/* Tabla de leads */}
