@@ -48,7 +48,7 @@ export default function Home() {
         {/* --- CAMBIO AQUÍ: Contenedor Flex para Título y Botón --- */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            Lista de Leads
+            Base de datos - SOS JACKSPOT
           </h1>
           
           <button
