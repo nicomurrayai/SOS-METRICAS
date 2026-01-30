@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
+import { Pen } from 'lucide-react';
 
 interface PrizeConfig {
   id: 'sos' | 'grua' | 'moto' | 'moura' | 'lusqtoff';
@@ -183,16 +184,17 @@ export default function Probability() {
 
   return (
     <div className="bg-white border border-gray-200 rounded p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-sm md:text-lg font-semibold text-gray-900">
+      <div className="flex flex-col gap-4 md:gap-0 md:flex-row justify-between items-center mb-4">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900">
           Configuración de Probabilidades
         </h2>
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="bg-orange-500 text-white px-3 py-1 text-sm font-medium border border-gray-300 rounded transition-colors"
+            className="bg-orange-500 flex items-center gap-2 text-white px-3 py-1 text-sm font-medium border border-gray-300 rounded transition-colors"
           >
             Editar
+            <Pen size={15} />
           </button>
         ) : (
           <div className="flex gap-2">
