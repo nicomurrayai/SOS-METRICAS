@@ -37,7 +37,7 @@ export default function Home() {
   if (leads === undefined) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Cargando...</div>
+        <div className="text-xl text-gray-600">Cargando....</div>
       </div>
     );
   }
