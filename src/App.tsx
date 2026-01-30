@@ -1,9 +1,37 @@
 "use client";
 import { api } from "../convex/_generated/api";
 import { useQuery } from "convex/react";
+import * as XLSX from "xlsx"; // Importamos la librería
 
 export default function Home() {
   const leads = useQuery(api.leads.getAllLeads);
+
+  // Función para manejar la exportación
+  const handleExport = () => {
+    if (!leads) return;
+
+    // 1. Preparamos los datos para que se vean bien en Excel
+    // Mapeamos los datos para traducir booleanos y formatear fechas
+    const dataToExport = leads.map((lead) => ({
+      Email: lead.email,
+      Ganador: lead.isWinner ? "Sí" : "No",
+      Premio: lead.prize || "-",
+      "Fecha de Creación": new Date(lead._creationTime).toLocaleString("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
+    }));
+
+    // 2. Crear una hoja de trabajo (Worksheet)
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+    // 3. Crear un libro de trabajo (Workbook)
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
+
+    // 4. Descargar el archivo
+    XLSX.writeFile(workbook, "Lista_de_Leads.xlsx");
+  };
 
   if (leads === undefined) {
     return (
@@ -16,9 +44,25 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Lista de Leads
-        </h1>
+        
+        {/* --- CAMBIO AQUÍ: Contenedor Flex para Título y Botón --- */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Lista de Leads
+          </h1>
+          
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+          >
+            {/* Icono de descarga opcional */}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Exportar Excel
+          </button>
+        </div>
+        {/* -------------------------------------------------------- */}
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
