@@ -123,7 +123,7 @@ export default function ProbabilityConfig() {
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+            className="bg-orange-500 text-white px-3 py-1 text-xs font-medium  border border-gray-300 rounded transition-colors"
           >
             Editar
           </button>
