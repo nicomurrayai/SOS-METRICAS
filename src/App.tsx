@@ -42,9 +42,13 @@ export default function Home() {
       </div>
     );
   }
-
-  const totalWinners = leads.filter((lead) => lead.isWinner).length;
   const totallosers = leads.filter((lead) => lead.isWinner === false).length;
+  const totalWinners = leads.filter((lead) => lead.isWinner).length;
+  const totalWinnersSOS = leads.filter((lead) => lead.prize === "SOS").length;
+  const totalWinnersGRUA = leads.filter((lead) => lead.prize === "Grúa").length;
+  const totalWinnersMOTO = leads.filter((lead) => lead.prize === "Moto").length;
+  const totalWinnersMOURA = leads.filter((lead) => lead.prize === "Moura").length;
+  const totalWinnersLUSQTOFF = leads.filter((lead) => lead.prize === "Lüsqtoff").length;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -73,6 +77,43 @@ export default function Home() {
 
 
         </div>
+        <div className="flex flex-col gap-2 mb-4 
+                sm:flex-row sm:flex-wrap sm:justify-end sm:items-center sm:gap-3 text-sm">
+
+          <p>
+            Total ganadores <strong>SOS</strong>:
+            <span className="text-green-600 ml-1 font-bold">{totalWinnersSOS}</span>
+          </p>
+
+          <span className="hidden sm:block">|</span>
+
+          <p>
+            Total ganadores  <strong>GRÚA</strong>:
+            <span className="text-green-600 ml-1 font-bold">{totalWinnersGRUA}</span>
+          </p>
+
+          <span className="hidden sm:block">|</span>
+
+          <p>
+            Total ganadores <strong>MOTO</strong>:
+            <span className="text-green-600 ml-1 font-bold">{totalWinnersMOTO}</span>
+          </p>
+
+          <span className="hidden sm:block">|</span>
+
+          <p>
+            Total ganadores <strong>MOURA</strong>:
+            <span className="text-green-600 ml-1 font-bold">{totalWinnersMOURA}</span>
+          </p>
+
+          <span className="hidden sm:block">|</span>
+
+          <p>
+            Total ganadores <strong>Lüsqtoff</strong>:
+            <span className="text-green-600 ml-1 font-bold">{totalWinnersLUSQTOFF}</span>
+          </p>
+        </div>
+
         <div className="flex justify-end">
           <button
             onClick={handleExport}
