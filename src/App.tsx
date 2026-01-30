@@ -58,7 +58,7 @@ export default function Home() {
         <Probability />
 
         {/* Estadísticas */}
-        <div className="my-4 flex items-center justify-between gap-6 text-sm md:text-lg font-bold text-gray-600 mt-14">
+        <div className="my-4 flex  items-center justify-between gap-6 text-xs md:text-lg font-bold text-gray-600 mt-14">
           <p>
             Total de registrados:{" "}
             <span className="text-gray-900">{leads.length}</span>
@@ -75,14 +75,16 @@ export default function Home() {
             </p>
           </div>
 
+
+        </div>
+        <div className="flex justify-end">
           <button
             onClick={handleExport}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
           >
             Exportar Excel
           </button>
         </div>
-
         {/* Tabla de leads */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
