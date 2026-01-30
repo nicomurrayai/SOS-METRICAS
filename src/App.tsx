@@ -33,6 +33,7 @@ export default function Home() {
     XLSX.writeFile(workbook, "Lista_de_Leads.xlsx");
   };
 
+
   if (leads === undefined) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -41,16 +42,19 @@ export default function Home() {
     );
   }
 
+  const totalWinners = leads.filter((lead) => lead.isWinner).length;
+
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* --- CAMBIO AQUÍ: Contenedor Flex para Título y Botón --- */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="flex flex-col md:flex-row gap-4 md:gap:0 justify-between items-center mb-6">
+          <h1 className="text-lg md:text-3xl font-bold text-gray-900">
             Base de datos - SOS JACKSPOT
           </h1>
-          
+
           <button
             onClick={handleExport}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
@@ -61,6 +65,19 @@ export default function Home() {
             </svg>
             Exportar Excel
           </button>
+        </div>
+
+
+        <div className="my-4 flex gap-6 text-sm md:text-lg font-bold text-gray-600">
+          <p>
+            Total de registrados:{" "}
+            <span className="text-gray-900">{leads.length}</span>
+          </p>
+
+          <p>
+            Total de ganadores:{" "}
+            <span className="text-green-600">{totalWinners}</span>
+          </p>
         </div>
         {/* -------------------------------------------------------- */}
 
@@ -124,9 +141,6 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-4 text-sm text-gray-600">
-          Total de leads: {leads.length}
-        </div>
       </div>
     </div>
   );
