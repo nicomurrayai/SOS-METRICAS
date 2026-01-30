@@ -2,7 +2,7 @@
 import { api } from "../convex/_generated/api";
 import { useQuery } from "convex/react";
 import * as XLSX from "xlsx";
-import ProbabilityConfig from "./ProbabilityConfig";
+import Probability from "./Probability";
 
 
 export default function Home() {
@@ -55,7 +55,7 @@ export default function Home() {
 
 
         {/* Componente de configuración de probabilidades */}
-        <ProbabilityConfig />
+        <Probability />
 
         {/* Estadísticas */}
         <div className="my-4 flex items-center justify-between gap-6 text-sm md:text-lg font-bold text-gray-600 mt-14">

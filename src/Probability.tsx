@@ -16,7 +16,7 @@ const PRIZES: PrizeConfig[] = [
   { id: 'lusqtoff', label: 'Lüsqtoff', color: 'bg-green-500' },
 ];
 
-export default function ProbabilityConfig() {
+export default function Probability() {
   const probabilities = useQuery(api.leads.getProbabilities);
   const updateAll = useMutation(api.leads.updateAllProbabilities);
   
