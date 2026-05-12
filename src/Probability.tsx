@@ -236,17 +236,9 @@ export default function Probability() {
                   className="h-10 w-1.5 flex-shrink-0 rounded-full"
                   style={{ backgroundColor: prize.color }}
                 />
-                <img
-                  src={prize.imageSrc}
-                  alt=""
-                  className="h-10 w-10 flex-shrink-0 object-contain"
-                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-gray-900">
                     {prize.label}
-                  </p>
-                  <p className="text-xs font-medium text-gray-500">
-                    ID: {prize.id}
                   </p>
                 </div>
               </div>
