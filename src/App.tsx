@@ -1,149 +1,165 @@
 "use client";
-import { api } from "../convex/_generated/api";
-import { useQuery } from "convex/react";
-import * as XLSX from "xlsx";
-import Probability from "./Probability";
-import { Download } from "lucide-react";
 
+import { useQuery } from "convex/react";
+import { Download } from "lucide-react";
+import * as XLSX from "xlsx";
+import { api } from "../convex/_generated/api";
+import {
+  normalizeSlotPrizesFromProbabilities,
+  normalizeSlotPrizes,
+  type SlotPrizeConfig,
+} from "./shared/slotConfig";
+import Probability from "./Probability";
+
+function getLeadPrizeLabel(lead: {
+  prize?: string | null;
+  prizeLabel?: string | null;
+}) {
+  return lead.prizeLabel || lead.prize || "-";
+}
+
+function leadMatchesPrize(
+  lead: {
+    prize?: string | null;
+    prizeId?: string | null;
+    prizeLabel?: string | null;
+  },
+  prize: SlotPrizeConfig,
+) {
+  return (
+    lead.prizeId === prize.id ||
+    lead.prizeLabel === prize.label ||
+    lead.prize === prize.label
+  );
+}
 
 export default function Home() {
   const leads = useQuery(api.leads.getAllLeads);
+  const probabilities = useQuery(api.leads.getProbabilities);
+  const prizes =
+    probabilities === undefined
+      ? normalizeSlotPrizes(null)
+      : normalizeSlotPrizesFromProbabilities(probabilities);
 
-  // Función para manejar la exportación
   const handleExport = () => {
     if (!leads) return;
 
-    // 1. Preparamos los datos para que se vean bien en Excel
     const dataToExport = leads.map((lead) => ({
       Email: lead.email,
-      Ganador: lead.isWinner ? "Sí" : "No",
-      Premio: lead.prize || "-",
-      "Fecha de Creación": new Date(lead._creationTime).toLocaleString("es-AR", {
+      Ganador: lead.isWinner ? "Si" : "No",
+      Juego: lead.game || "slotmachine",
+      Premio: getLeadPrizeLabel(lead),
+      "Fecha de creacion": new Date(
+        lead.createdAt ?? lead._creationTime,
+      ).toLocaleString("es-AR", {
         dateStyle: "short",
         timeStyle: "short",
       }),
     }));
 
-    // 2. Crear una hoja de trabajo (Worksheet)
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-
-    // 3. Crear un libro de trabajo (Workbook)
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
-
-    // 4. Descargar el archivo
-    XLSX.writeFile(workbook, "Lista_de_Leads.xlsx");
+    XLSX.writeFile(workbook, "Leads_SOS_Slot.xlsx");
   };
 
   if (leads === undefined) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Cargando....</div>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-xl text-gray-600">Cargando...</div>
       </div>
     );
   }
-  const totallosers = leads.filter((lead) => lead.isWinner === false).length;
+
+  const totalLosers = leads.filter((lead) => lead.isWinner === false).length;
   const totalWinners = leads.filter((lead) => lead.isWinner).length;
-  const totalWinnersSOS = leads.filter((lead) => lead.prize === "SOS").length;
-  const totalWinnersGRUA = leads.filter((lead) => lead.prize === "Grúa").length;
-  const totalWinnersMOTO = leads.filter((lead) => lead.prize === "Moto").length;
-  const totalWinnersMOURA = leads.filter((lead) => lead.prize === "Moura").length;
-  const totalWinnersLUSQTOFF = leads.filter((lead) => lead.prize === "Lüsqtoff").length;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-lg md:text-3xl text-center md:text-left font-light text-gray-900 mb-6">
-          Panel de configuración y metricas | <br className="md:hidden" /> <strong className="font-bold text-lg md:text-2xl">SOS JACKSPOT</strong>
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="mb-6 text-center text-lg font-light text-gray-900 md:text-left md:text-3xl">
+          Panel de configuracion y metricas |{" "}
+          <br className="md:hidden" />{" "}
+          <strong className="text-lg font-bold md:text-2xl">
+            SOS SLOT MACHINE
+          </strong>
         </h1>
+
         <Probability />
-        <hr className="h-4 border-black my-10" />
-        <div className="my-4 flex  items-center justify-between gap-6 text-xs md:text-lg font-bold text-gray-600">
+
+        <hr className="my-10 h-4 border-black" />
+
+        <div className="my-4 flex flex-col gap-3 text-sm font-bold text-gray-600 md:flex-row md:items-center md:justify-between md:text-lg">
           <p>
             Total de registrados:{" "}
             <span className="text-gray-900">{leads.length}</span>
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             <p>
               Total de ganadores:{" "}
               <span className="text-green-600">{totalWinners}</span>
             </p>
             <p>
               Total de perdedores:{" "}
-              <span className="text-red-600">{totallosers}</span>
+              <span className="text-red-600">{totalLosers}</span>
             </p>
           </div>
-
-
         </div>
-        <div className="flex flex-col gap-2 mb-4 
-                sm:flex-row sm:flex-wrap sm:justify-end sm:items-center sm:gap-3 text-sm">
 
-          <p>
-            Total ganadores <strong>SOS</strong>:
-            <span className="text-green-600 ml-1 font-bold">{totalWinnersSOS}</span>
-          </p>
+        <div className="mb-4 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          {prizes.map((prize) => {
+            const total = leads.filter((lead) =>
+              leadMatchesPrize(lead, prize),
+            ).length;
 
-          <span className="hidden sm:block">|</span>
-
-          <p>
-            Total ganadores  <strong>GRÚA</strong>:
-            <span className="text-green-600 ml-1 font-bold">{totalWinnersGRUA}</span>
-          </p>
-
-          <span className="hidden sm:block">|</span>
-
-          <p>
-            Total ganadores <strong>MOTO</strong>:
-            <span className="text-green-600 ml-1 font-bold">{totalWinnersMOTO}</span>
-          </p>
-
-          <span className="hidden sm:block">|</span>
-
-          <p>
-            Total ganadores <strong>MOURA</strong>:
-            <span className="text-green-600 ml-1 font-bold">{totalWinnersMOURA}</span>
-          </p>
-
-          <span className="hidden sm:block">|</span>
-
-          <p>
-            Total ganadores <strong>Lüsqtoff</strong>:
-            <span className="text-green-600 ml-1 font-bold">{totalWinnersLUSQTOFF}</span>
-          </p>
+            return (
+              <div
+                key={prize.id}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <strong className="truncate text-gray-800">
+                    {prize.label}
+                  </strong>
+                  <span className="font-bold text-green-600">{total}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="flex justify-end">
           <button
+            type="button"
             onClick={handleExport}
-            className="mb-2 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            className="mb-2 inline-flex items-center gap-2 rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
           >
             Descargar Excel
             <Download size={15} />
           </button>
         </div>
-        {/* Tabla de leads */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+
+        <div className="overflow-hidden rounded-lg bg-white shadow">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     Ganador
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     Premio
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha de Creación
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Fecha de creacion
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 bg-white">
                 {leads.length === 0 ? (
                   <tr>
                     <td
@@ -156,25 +172,27 @@ export default function Home() {
                 ) : (
                   leads.map((lead) => (
                     <tr key={lead._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                         {lead.email}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm">
                         {lead.isWinner ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Sí
+                          <span className="inline-flex rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                            Si
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                             No
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {lead.prize || "-"}
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                        {getLeadPrizeLabel(lead)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(lead._creationTime).toLocaleString("es-AR", {
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                        {new Date(
+                          lead.createdAt ?? lead._creationTime,
+                        ).toLocaleString("es-AR", {
                           dateStyle: "short",
                           timeStyle: "short",
                         })}
